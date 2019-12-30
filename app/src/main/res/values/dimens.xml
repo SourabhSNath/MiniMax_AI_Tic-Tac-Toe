@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="XOBoxSize">100dp</dimen>
+    <dimen name="XOBoxCorner">6dp</dimen>
+    <dimen name="XOBoxElevation">20dp</dimen>
+</resources>

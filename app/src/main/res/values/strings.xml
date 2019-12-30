@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Awesome Tic-Tac-Toe</string>
+    <string name="currentPlayer">@string/player1Instruction</string>
+
+    <string name="player1Instruction">Player 1\'s turn</string>
+    <string name="player2Instruction">Player 2\'s turn</string>
+    <string name="ai_overlord_turn">AI Overlord\'s turn</string>
+    <string name="playerVsCPU">Player vs AI</string>
+    <string name="player1">Player 1</string>
+    <string name="player2">Player 2</string>
+    <string name="ai_overlord">AI Overlord</string>
+    <string name="ai">AI</string>
+    <string name="player_vs_ai_overlord">Player Vs AI Overlord</string>
+    <string name="player_vs_player">Player Vs Player</string>
+    <string name="undo">Undo</string>
+    <string name="reset">Reset</string>
+    <string name="game_modes">Game modes</string>
+
+    <string-array name="drop_down_options">
+        <item>@string/player_vs_player</item>
+        <item>@string/player_vs_ai_overlord</item>
+    </string-array>
+</resources>
