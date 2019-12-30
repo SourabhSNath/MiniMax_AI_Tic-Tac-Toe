@@ -32,6 +32,7 @@ public class GameModel {
     private MutableLiveData<Integer> player2ScoreMutableLiveData = new MutableLiveData<>();
     private MutableLiveData<String> winnerMutableLiveData = new MutableLiveData<>();
 
+
     private Stack<String> undoStack;
 
     private int row;
@@ -80,6 +81,7 @@ public class GameModel {
         justPlayed = currentPlayer;
 
         undoStack.push(String.format("%d%d", row, col));
+
 
         return justPlayed;
     }
@@ -184,7 +186,6 @@ public class GameModel {
         return player2ScoreMutableLiveData;
     }
 
-
     public LiveData<String> winner() {
         if (winner != null) {
             winnerMutableLiveData.setValue((winner == Player.X) ? player1 : player2);
@@ -197,5 +198,23 @@ public class GameModel {
 
     public LiveData<String> playerInstruction() {
         return playerInstructionMutableLiveData;
+    }
+
+    public String undoMove() {
+        String undone = "";
+
+        if (!undoStack.isEmpty()) {
+            undone = undoStack.pop();
+        }
+
+        if (undone != null && undone.length() != 0) {
+            int row = Integer.parseInt(String.valueOf(undone.charAt(0)));
+            int col = Integer.parseInt(String.valueOf(undone.charAt(1)));
+
+            Log.d(TAG, "undoMove: undoing " + row + " " + col);
+            TTTCell[row][col].setValue(null);
+            return undone;
+        }
+        return undone;
     }
 }

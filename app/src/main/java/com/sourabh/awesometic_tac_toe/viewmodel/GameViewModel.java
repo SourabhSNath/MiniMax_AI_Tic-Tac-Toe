@@ -20,13 +20,13 @@ public class GameViewModel extends ViewModel {
     private MutableLiveData<Integer> player1Score = new MutableLiveData<>();
     private MutableLiveData<Integer> player2Score = new MutableLiveData<>();
 
-    private boolean isMatchOver;
-
+    private boolean undoCheck;
 
     public GameViewModel() {
         this.gameModel = new GameModel();
         getPlayer1Score();
         getPlayer2Score();
+        undoCheck = false;
     }
 
     @SuppressLint("DefaultLocale")
@@ -36,18 +36,41 @@ public class GameViewModel extends ViewModel {
 
         if (gameModel.isValid(row, column)) {
 
-            Player player = gameModel.mark(row, column);
-            if (player != null)
-                markCellText.put(String.format("%d%d", row, column), player.toString());
+            if (undoCheck) {
 
-            if (gameModel.isGameEnd()) {
-                winner();
+                markCellText.put(String.format("%d%d", row, column), "");
+                undoCheck = false;
 
             } else {
-                gameModel.switchPlayer();
+
+                Player player = gameModel.mark(row, column);
+                if (player != null) {
+
+                    markCellText.put(String.format("%d%d", row, column), player.toString());
+
+                    if (gameModel.isGameEnd()) {
+                        winner();
+
+                    } else{
+                        Log.d("onClick", "onCellClicked: switched");
+                        gameModel.switchPlayer();
+                    }
+                }
+
             }
         }
 
+    }
+
+
+    public void onUndo() {
+        String undoRowCol = gameModel.undoMove();
+        if (undoRowCol != null && undoRowCol.length() != 0) {
+            int row = Integer.parseInt(String.valueOf(undoRowCol.charAt(0)));
+            int col = Integer.parseInt(String.valueOf(undoRowCol.charAt(1)));
+            undoCheck = true;
+            onCellClicked(row, col);
+        }
     }
 
 
