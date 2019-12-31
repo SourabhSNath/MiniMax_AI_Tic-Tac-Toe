@@ -23,9 +23,16 @@ public class GameViewModel extends ViewModel {
     private boolean undoCheck;
 
     public GameViewModel() {
-        this.gameModel = new GameModel();
+
+        restart();
+
         getPlayer1Score();
         getPlayer2Score();
+
+    }
+
+    private void restart() {
+        this.gameModel = new GameModel();
         undoCheck = false;
     }
 
@@ -35,7 +42,6 @@ public class GameViewModel extends ViewModel {
         Log.d("OnClick", "onCellClicked: " + row + " " + column);
 
         if (gameModel.isValid(row, column)) {
-
             if (undoCheck) {
 
                 markCellText.put(String.format("%d%d", row, column), "");
@@ -44,27 +50,29 @@ public class GameViewModel extends ViewModel {
             } else {
 
                 Player player = gameModel.mark(row, column);
-                if (player != null) {
 
+                if (player != null) {
                     markCellText.put(String.format("%d%d", row, column), player.toString());
 
                     if (gameModel.isGameEnd()) {
                         winner();
-
-                    } else{
-                        Log.d("onClick", "onCellClicked: switched");
+                    } else {
                         gameModel.switchPlayer();
                     }
                 }
-
             }
         }
 
     }
 
+    public void onReset() {
+        restart();
+        markCellText.clear();
+        restart();
+    }
 
     public void onUndo() {
-        String undoRowCol = gameModel.undoMove();
+        String undoRowCol = gameModel.undoMove().getValue();
         if (undoRowCol != null && undoRowCol.length() != 0) {
             int row = Integer.parseInt(String.valueOf(undoRowCol.charAt(0)));
             int col = Integer.parseInt(String.valueOf(undoRowCol.charAt(1)));
@@ -73,8 +81,7 @@ public class GameViewModel extends ViewModel {
         }
     }
 
-
-    public LiveData<String> winner() {
+    private LiveData<String> winner() {
         if (gameModel.winner() != null || Objects.equals(gameModel.winner().getValue(), "Tied!")) {
             return gameModel.winner();
         }

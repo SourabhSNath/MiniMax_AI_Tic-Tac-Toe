@@ -1,6 +1,7 @@
 package com.sourabh.awesometic_tac_toe.model;
 
 class Cell {
+
     private Player value;
 
     Player getValue() {
@@ -9,5 +10,9 @@ class Cell {
 
     void setValue(Player value) {
         this.value = value;
+    }
+
+    public boolean isEmpty() {
+        return value == null || value.toString().length() != 0;
     }
 }
