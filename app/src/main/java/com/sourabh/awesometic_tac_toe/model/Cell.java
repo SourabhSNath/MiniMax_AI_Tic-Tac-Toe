@@ -1,6 +1,6 @@
 package com.sourabh.awesometic_tac_toe.model;
 
-class Cell {
+public class Cell {
 
     private Player value;
 

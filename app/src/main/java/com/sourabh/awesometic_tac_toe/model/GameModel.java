@@ -13,7 +13,8 @@ public class GameModel {
     private final String TAG = this.getClass().getName();
 
     private Cell[][] TTTCells = new Cell[3][3];
-    private int row, col;
+    static public int row, col;
+
     private Player currentPlayer, winner;
     private int player1Score = 0, player2Score = 0;
     private GameStates gameState;
@@ -21,6 +22,8 @@ public class GameModel {
     private static final String player1 = "Player 1",
             player2 = "Player 2",
             tie = "Tied!";
+
+    private static MutableLiveData<Player> currentPlayerMutableLiveData = new MutableLiveData<>();
 
     //To pass the instructions from switchPlayer() to the viewModel
     private static MutableLiveData<String> playerInstructionMutableLiveData = new MutableLiveData<>();
@@ -35,11 +38,6 @@ public class GameModel {
 
     public GameModel() {
         currentPlayer = Player.X;
-        restart();
-        gameState = GameStates.IS_RUNNING;
-    }
-
-    private void restart() {
         winner = null;
         winnerMutableLiveData.setValue(null);
         undoStack = new Stack<>();
@@ -50,31 +48,35 @@ public class GameModel {
                 TTTCells[i][j] = new Cell();
             }
         }
-
+        gameState = GameStates.IS_RUNNING;
     }
 
     /**
-     * Perform operation if the move is valid
+     * Marks the Player on the board
+     * Pushes row and column info on to the stack
      *
-     * @param row 0-2
-     * @param col 0-2
-     * @return player
+     * @param row 0-2, passed from GameViewModel
+     * @param col 0-2, also passed from GameViewModel
+     * @return currentPlayer, which will be marked on the UI through dataBinding
      */
     @SuppressLint("DefaultLocale")
-    public Player mark(int row, int col) {
+    public LiveData<Player> mark(int row, int col) {
 
-        this.row = row;
-        this.col = col;
+        GameModel.row = row;
+        GameModel.col = col;
 
         Log.d(TAG, "mark: " + currentPlayer.toString());
 
         TTTCells[row][col].setValue(currentPlayer);
         undoStack.push(String.format("%d%d", row, col));
 
-        return currentPlayer;
+        currentPlayerMutableLiveData.setValue(currentPlayer);
+        return currentPlayerMutableLiveData;
     }
 
-    //Switch the player if the current Player is Player 1
+    /**
+     * Used in GameViewModel class to switch player if game isn't over
+     */
     public void switchPlayer() {
         currentPlayer = (currentPlayer == Player.X) ? Player.O : Player.X;
 
@@ -86,24 +88,28 @@ public class GameModel {
         }
     }
 
+    /**
+     * Used in the GameViewModel to check if the current move is valid
+     */
     public boolean isValid(int row, int col) {
 
         if (gameState == GameStates.IS_OVER) {
             return false;
         } else if (isCellNotEmpty(row, col)) {
             return false;
-        } else if (row > 2 || col > 2 || row < 0 || col < 0) {
-            return false;
         } else
             return true;
     }
 
-    //Increment drawCounter here if the value is null
     private boolean isCellNotEmpty(int row, int col) {
         return TTTCells[row][col].getValue() != null; //return true if not null
     }
 
-    //Check if the game has end with a winning move or a tie
+    /**
+     * Check if the game has end with a winning move or a tie
+     *
+     * @return true if the Game is over
+     */
     public boolean isGameEnd() {
         if (isGameWon(currentPlayer, row, col)) {
             winner = currentPlayer;
@@ -114,14 +120,18 @@ public class GameModel {
         return isGameTie();
     }
 
-    //Check if board is full
+    /**
+     * Check if board is full
+     *
+     * @return false if a cell is empty
+     * else set the GameState to IS_OVER
+     */
     private boolean isGameTie() {
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (TTTCells[i][j].getValue() == null) {
-                    return false; //False if any of the cell is empty
-                }
+        for (Cell[] tttCell : TTTCells) {
+            for (Cell cell : tttCell) {
+                if (cell.getValue() == null)
+                    return false;
             }
         }
         Log.d(TAG, "winner: Game Tied!");
@@ -130,9 +140,16 @@ public class GameModel {
         return true;
     }
 
+    /**
+     * Check if the Current Player has won the game
+     *
+     * @param row current row position
+     * @param col current column position
+     * @return true if current player wins the game
+     */
     private boolean isGameWon(Player currentPlayer, int row, int col) {
 
-        return (TTTCells[row][0].getValue() == currentPlayer //Row Check
+        return TTTCells[row][0].getValue() == currentPlayer //Row Check
                 && TTTCells[row][1].getValue() == currentPlayer
                 && TTTCells[row][2].getValue() == currentPlayer
 
@@ -140,18 +157,21 @@ public class GameModel {
                 && TTTCells[1][col].getValue() == currentPlayer
                 && TTTCells[2][col].getValue() == currentPlayer
 
-                || row == col //DO only if this condition's met
+                || row == col //False if this condition isn't met
                 && TTTCells[0][0].getValue() == currentPlayer //Left Diagonal Check
                 && TTTCells[1][1].getValue() == currentPlayer
                 && TTTCells[2][2].getValue() == currentPlayer
 
-                || row + col == 2
+                || row + col == 2 //False if this condition isn't met
                 && TTTCells[0][2].getValue() == currentPlayer //Right Diagonal Check
                 && TTTCells[1][1].getValue() == currentPlayer
-                && TTTCells[2][0].getValue() == currentPlayer);
+                && TTTCells[2][0].getValue() == currentPlayer;
 
     }
 
+    /**
+     * Passing all the below return values through LiveData to the GameViewModel
+     */
     public LiveData<Integer> player1Score() {
         player1ScoreMutableLiveData.setValue(player1Score);
         if (winner == Player.X) {
@@ -160,7 +180,6 @@ public class GameModel {
         }
         return player1ScoreMutableLiveData;
     }
-
 
     public LiveData<Integer> player2Score() {
         player2ScoreMutableLiveData.setValue(player2Score);
@@ -188,6 +207,7 @@ public class GameModel {
 
     /**
      * Check if undo stack is empty to prevent EmptyStackException
+     * <p>
      * Switch the player once again when undoing to prevent the current player from changing
      */
     private MutableLiveData<String> undoneMutableLiveData = new MutableLiveData<>();
@@ -212,5 +232,9 @@ public class GameModel {
             return undoneMutableLiveData;
         }
         return undoneMutableLiveData;
+    }
+
+    public Cell[][] getTTTCells() {
+        return TTTCells;
     }
 }

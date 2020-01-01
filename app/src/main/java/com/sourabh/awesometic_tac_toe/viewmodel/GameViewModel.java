@@ -13,6 +13,7 @@ import com.sourabh.awesometic_tac_toe.model.Player;
 
 import java.util.Objects;
 
+@SuppressLint("DefaultLocale")
 public class GameViewModel extends ViewModel {
 
     private GameModel gameModel;
@@ -28,7 +29,6 @@ public class GameViewModel extends ViewModel {
 
         getPlayer1Score();
         getPlayer2Score();
-
     }
 
     private void restart() {
@@ -36,20 +36,24 @@ public class GameViewModel extends ViewModel {
         undoCheck = false;
     }
 
-    @SuppressLint("DefaultLocale")
-    public void onCellClicked(int row, int column) {
 
-        Log.d("OnClick", "onCellClicked: " + row + " " + column);
+    /**
+     * Called when Board Cells (made with TextViews) are clicked
+     *
+     * @param row    passed from the cell
+     * @param column passed from the cell
+     */
+    public void onCellClicked(int row, int column) {
 
         if (gameModel.isValid(row, column)) {
             if (undoCheck) {
 
-                markCellText.put(String.format("%d%d", row, column), "");
-                undoCheck = false;
+                markCellText.put(String.format("%d%d", row, column), ""); //Removes the mark
+                undoCheck = false; //Set to false once undo complete
 
             } else {
 
-                Player player = gameModel.mark(row, column);
+                Player player = gameModel.mark(row, column).getValue();
 
                 if (player != null) {
                     markCellText.put(String.format("%d%d", row, column), player.toString());
@@ -65,11 +69,22 @@ public class GameViewModel extends ViewModel {
 
     }
 
+    /**
+     * Clears the board when the reset button is clicked
+     * ObservableArrayMap has to be cleared here
+     */
     public void onReset() {
-        restart();
         markCellText.clear();
         restart();
     }
+
+    /**
+     * Called when the undo button is pressed
+     * onCellClicked is called once again here to remove the mark from the position
+     * <p>
+     * The player has to be switched once again in undoMove() in side the GameModel class
+     * else the onCellClicked() would switch it to the next player other wise
+     */
 
     public void onUndo() {
         String undoRowCol = gameModel.undoMove().getValue();
