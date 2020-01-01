@@ -23,23 +23,15 @@ public class GameModel {
             PLAYER_2 = "Player 2",
             TIED = "Tied!";
 
-    private MutableLiveData<Player> currentPlayerMutableLiveData = new MutableLiveData<>();
-
     //To pass the instructions from switchPlayer() to the viewModel
     private MutableLiveData<String> playerInstructionMutableLiveData = new MutableLiveData<>();
 
-    // To pass the winner and scores to the viewModel
-    private MutableLiveData<Integer> player1ScoreMutableLiveData = new MutableLiveData<>();
-    private MutableLiveData<Integer> player2ScoreMutableLiveData = new MutableLiveData<>();
-    private MutableLiveData<String> winnerMutableLiveData = new MutableLiveData<>();
+    private Stack<int[]> undoStack;
 
-    private Stack<String> undoStack;
-
-
+    //Constructor
     public GameModel() {
         currentPlayer = Player.X;
         winner = null;
-        winnerMutableLiveData.setValue(null);
         undoStack = new Stack<>();
 
         playerInstructionMutableLiveData.setValue("Player 1's turn");
@@ -61,6 +53,7 @@ public class GameModel {
      */
     @SuppressLint("DefaultLocale")
     public LiveData<Player> mark(int row, int col) {
+        MutableLiveData<Player> currentPlayerMutableLiveData = new MutableLiveData<>();
 
         GameModel.row = row;
         GameModel.col = col;
@@ -68,8 +61,9 @@ public class GameModel {
         Log.d(TAG, "mark: " + currentPlayer.toString());
 
         TTTBoard[row][col] = currentPlayer.toString().charAt(0);
-        undoStack.push(String.format("%d%d", row, col));
+//        undoStack.push(String.format("%d%d", row, col));
 
+        undoStack.push(new int[]{row, col});
         currentPlayerMutableLiveData.setValue(currentPlayer);
         return currentPlayerMutableLiveData;
     }
@@ -177,6 +171,8 @@ public class GameModel {
      * Passing all the below return values through LiveData to the GameViewModel
      */
     public LiveData<Integer> player1Score() {
+        MutableLiveData<Integer> player1ScoreMutableLiveData = new MutableLiveData<>();
+
         player1ScoreMutableLiveData.setValue(player1Score);
         if (winner == Player.X) {
             player1Score++;
@@ -186,6 +182,8 @@ public class GameModel {
     }
 
     public LiveData<Integer> player2Score() {
+        MutableLiveData<Integer> player2ScoreMutableLiveData = new MutableLiveData<>();
+
         player2ScoreMutableLiveData.setValue(player2Score);
         if (winner == Player.O) {
             player2Score++;
@@ -195,6 +193,8 @@ public class GameModel {
     }
 
     public LiveData<String> winner() {
+        MutableLiveData<String> winnerMutableLiveData = new MutableLiveData<>();
+
         if (winner != null) {
             winnerMutableLiveData.setValue((winner == Player.X) ? PLAYER_1 : PLAYER_2);
             return winnerMutableLiveData;
@@ -213,18 +213,16 @@ public class GameModel {
      * <p>
      * Switch the player once again when undoing to prevent the current player from changing
      */
-    private MutableLiveData<String> undoneMutableLiveData = new MutableLiveData<>();
+    public LiveData<int[]> undoMove() {
+        MutableLiveData<int[]> undoneMutableLiveData = new MutableLiveData<>();
 
-    public LiveData<String> undoMove() {
-        String undone = "";
+        int[] undone = new int[2];
 
-        if (!undoStack.isEmpty()) {
-            undone = undoStack.pop();
-        }
+        if (!undoStack.isEmpty()) undone = undoStack.pop();
 
-        if (undone != null && undone.length() != 0) {
-            int row = Integer.parseInt(String.valueOf(undone.charAt(0)));
-            int col = Integer.parseInt(String.valueOf(undone.charAt(1)));
+        if (undone != null) {
+            int row = undone[0];
+            int col = undone[1];
 
             Log.d(TAG, "undoMove: undoing " + row + " " + col);
 
@@ -236,6 +234,5 @@ public class GameModel {
         }
         return undoneMutableLiveData;
     }
-
 
 }

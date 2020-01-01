@@ -24,6 +24,6 @@ abstract class MiniMaxAI {
         opponentMark = (aiMark == Player.O) ? Player.X : Player.O;
     }
 
-    abstract int[] move();
+    abstract public int[] move();
 
 }

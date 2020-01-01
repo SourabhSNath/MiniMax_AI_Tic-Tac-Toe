@@ -87,10 +87,10 @@ public class GameViewModel extends ViewModel {
      */
 
     public void onUndo() {
-        String undoRowCol = gameModel.undoMove().getValue();
-        if (undoRowCol != null && undoRowCol.length() != 0) {
-            int row = Integer.parseInt(String.valueOf(undoRowCol.charAt(0)));
-            int col = Integer.parseInt(String.valueOf(undoRowCol.charAt(1)));
+        int[] undoRowCol = gameModel.undoMove().getValue();
+        if (undoRowCol != null) {
+            int row = undoRowCol[0];
+            int col = undoRowCol[1];
             undoCheck = true;
             onCellClicked(row, col);
         }
