@@ -1,6 +1,5 @@
 package com.sourabh.awesometic_tac_toe.model.ai;
 
-import com.sourabh.awesometic_tac_toe.model.Cell;
 import com.sourabh.awesometic_tac_toe.model.GameModel;
 import com.sourabh.awesometic_tac_toe.model.Player;
 
@@ -13,12 +12,11 @@ abstract class MiniMaxAI {
     protected int row = GameModel.row;
     protected int col = GameModel.col;
 
-    protected Cell[][] TTTCells;
     protected Player aiMark;
     protected Player opponentMark;
 
     public MiniMaxAI(GameModel gameModel) {
-        TTTCells = gameModel.getTTTCells();
+//        TTTCells = gameModel.getTTTCells();
     }
 
     public void setMarkSymbol(Player mark) {

@@ -16,9 +16,9 @@ public class AIOverlord extends MiniMaxAI {
     @Override
     int[] move() {
         for (int[] move : preferredMoves) {
-            if (TTTCells[0][move[1]].isEmpty()) {
-                return move;
-            }
+//            if (TTTCells[0][move[1]].isEmpty()) {
+//                return move;
+//            }
         }
         return null;
     }

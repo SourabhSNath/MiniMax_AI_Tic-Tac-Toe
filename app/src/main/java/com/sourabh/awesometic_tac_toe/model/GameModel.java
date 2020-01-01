@@ -12,7 +12,7 @@ public class GameModel {
 
     private final String TAG = this.getClass().getName();
 
-    private Cell[][] TTTCells = new Cell[3][3];
+    private char[][] TTTCell = new char[3][3];
     static public int row, col;
 
     private Player currentPlayer, winner;
@@ -45,7 +45,7 @@ public class GameModel {
         playerInstructionMutableLiveData.setValue("Player 1's turn");
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                TTTCells[i][j] = new Cell();
+                TTTCell[i][j] = ' ';
             }
         }
         gameState = GameStates.IS_RUNNING;
@@ -67,7 +67,7 @@ public class GameModel {
 
         Log.d(TAG, "mark: " + currentPlayer.toString());
 
-        TTTCells[row][col].setValue(currentPlayer);
+        TTTCell[row][col] = (currentPlayer == Player.X) ? 'x' : 'o';
         undoStack.push(String.format("%d%d", row, col));
 
         currentPlayerMutableLiveData.setValue(currentPlayer);
@@ -102,7 +102,7 @@ public class GameModel {
     }
 
     private boolean isCellNotEmpty(int row, int col) {
-        return TTTCells[row][col].getValue() != null; //return true if not null
+        return TTTCell[row][col] != ' '; //return true if not null
     }
 
     /**
@@ -111,6 +111,7 @@ public class GameModel {
      * @return true if the Game is over
      */
     public boolean isGameEnd() {
+
         if (isGameWon(currentPlayer, row, col)) {
             winner = currentPlayer;
             Log.d(TAG, "winner: " + winner.toString());
@@ -128,10 +129,11 @@ public class GameModel {
      */
     private boolean isGameTie() {
 
-        for (Cell[] tttCell : TTTCells) {
-            for (Cell cell : tttCell) {
-                if (cell.getValue() == null)
+        for (char[] row : TTTCell) {
+            for (char cell : row) {
+                if (cell == ' ') {
                     return false;
+                }
             }
         }
         Log.d(TAG, "winner: Game Tied!");
@@ -147,25 +149,27 @@ public class GameModel {
      * @param col current column position
      * @return true if current player wins the game
      */
-    private boolean isGameWon(Player currentPlayer, int row, int col) {
+    private boolean isGameWon(Player player, int row, int col) {
 
-        return TTTCells[row][0].getValue() == currentPlayer //Row Check
-                && TTTCells[row][1].getValue() == currentPlayer
-                && TTTCells[row][2].getValue() == currentPlayer
+        char currentPlayer = (player == Player.X) ? 'x' : 'o';
 
-                || TTTCells[0][col].getValue() == currentPlayer //Column Check
-                && TTTCells[1][col].getValue() == currentPlayer
-                && TTTCells[2][col].getValue() == currentPlayer
+        return TTTCell[row][0] == currentPlayer//Row Check
+                && TTTCell[row][1] == currentPlayer
+                && TTTCell[row][2] == currentPlayer
+
+                || TTTCell[0][col] == currentPlayer //Column Check
+                && TTTCell[1][col] == currentPlayer
+                && TTTCell[2][col] == currentPlayer
 
                 || row == col //False if this condition isn't met
-                && TTTCells[0][0].getValue() == currentPlayer //Left Diagonal Check
-                && TTTCells[1][1].getValue() == currentPlayer
-                && TTTCells[2][2].getValue() == currentPlayer
+                && TTTCell[0][0] == currentPlayer //Left Diagonal Check
+                && TTTCell[1][1] == currentPlayer
+                && TTTCell[2][2] == currentPlayer
 
                 || row + col == 2 //False if this condition isn't met
-                && TTTCells[0][2].getValue() == currentPlayer //Right Diagonal Check
-                && TTTCells[1][1].getValue() == currentPlayer
-                && TTTCells[2][0].getValue() == currentPlayer;
+                && TTTCell[0][2] == currentPlayer //Right Diagonal Check
+                && TTTCell[1][1] == currentPlayer
+                && TTTCell[2][0] == currentPlayer;
 
     }
 
@@ -204,7 +208,6 @@ public class GameModel {
         return playerInstructionMutableLiveData;
     }
 
-
     /**
      * Check if undo stack is empty to prevent EmptyStackException
      * <p>
@@ -224,8 +227,8 @@ public class GameModel {
             int col = Integer.parseInt(String.valueOf(undone.charAt(1)));
 
             Log.d(TAG, "undoMove: undoing " + row + " " + col);
-            TTTCells[row][col].setValue(null);
 
+            TTTCell[row][col] = ' ';
             switchPlayer();
 
             undoneMutableLiveData.setValue(undone);
@@ -234,7 +237,5 @@ public class GameModel {
         return undoneMutableLiveData;
     }
 
-    public Cell[][] getTTTCells() {
-        return TTTCells;
-    }
+
 }
