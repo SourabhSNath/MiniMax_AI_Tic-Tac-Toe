@@ -12,16 +12,16 @@ public class GameModel {
 
     private final String TAG = this.getClass().getName();
 
-    private char[][] TTTCell = new char[3][3];
+    private char[][] TTTBoard = new char[3][3];
     static public int row, col;
 
     private Player currentPlayer, winner;
     private int player1Score = 0, player2Score = 0;
     private GameStates gameState;
 
-    private static final String player1 = "Player 1",
-            player2 = "Player 2",
-            tie = "Tied!";
+    private static final String PLAYER_1 = "Player 1",
+            PLAYER_2 = "Player 2",
+            TIED = "Tied!";
 
     private MutableLiveData<Player> currentPlayerMutableLiveData = new MutableLiveData<>();
 
@@ -45,7 +45,7 @@ public class GameModel {
         playerInstructionMutableLiveData.setValue("Player 1's turn");
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                TTTCell[i][j] = ' ';
+                TTTBoard[i][j] = ' ';
             }
         }
         gameState = GameStates.IS_RUNNING;
@@ -67,7 +67,7 @@ public class GameModel {
 
         Log.d(TAG, "mark: " + currentPlayer.toString());
 
-        TTTCell[row][col] = (currentPlayer == Player.X) ? 'x' : 'o';
+        TTTBoard[row][col] = currentPlayer.toString().charAt(0);
         undoStack.push(String.format("%d%d", row, col));
 
         currentPlayerMutableLiveData.setValue(currentPlayer);
@@ -102,11 +102,11 @@ public class GameModel {
     }
 
     private boolean isCellNotEmpty(int row, int col) {
-        return TTTCell[row][col] != ' '; //return true if not null
+        return TTTBoard[row][col] != ' '; //return true if not null
     }
 
     /**
-     * Check if the game has end with a winning move or a tie
+     * Check if the game has end with a winning move or a TIED
      *
      * @return true if the Game is over
      */
@@ -129,7 +129,7 @@ public class GameModel {
      */
     private boolean isGameTie() {
 
-        for (char[] row : TTTCell) {
+        for (char[] row : TTTBoard) {
             for (char cell : row) {
                 if (cell == ' ') {
                     return false;
@@ -151,25 +151,25 @@ public class GameModel {
      */
     private boolean isGameWon(Player player, int row, int col) {
 
-        char currentPlayer = (player == Player.X) ? 'x' : 'o';
+        char currentPlayer = player.toString().charAt(0);
 
-        return TTTCell[row][0] == currentPlayer//Row Check
-                && TTTCell[row][1] == currentPlayer
-                && TTTCell[row][2] == currentPlayer
+        return TTTBoard[row][0] == currentPlayer//Row Check
+                && TTTBoard[row][1] == currentPlayer
+                && TTTBoard[row][2] == currentPlayer
 
-                || TTTCell[0][col] == currentPlayer //Column Check
-                && TTTCell[1][col] == currentPlayer
-                && TTTCell[2][col] == currentPlayer
+                || TTTBoard[0][col] == currentPlayer //Column Check
+                && TTTBoard[1][col] == currentPlayer
+                && TTTBoard[2][col] == currentPlayer
 
                 || row == col //False if this condition isn't met
-                && TTTCell[0][0] == currentPlayer //Left Diagonal Check
-                && TTTCell[1][1] == currentPlayer
-                && TTTCell[2][2] == currentPlayer
+                && TTTBoard[0][0] == currentPlayer //Left Diagonal Check
+                && TTTBoard[1][1] == currentPlayer
+                && TTTBoard[2][2] == currentPlayer
 
                 || row + col == 2 //False if this condition isn't met
-                && TTTCell[0][2] == currentPlayer //Right Diagonal Check
-                && TTTCell[1][1] == currentPlayer
-                && TTTCell[2][0] == currentPlayer;
+                && TTTBoard[0][2] == currentPlayer //Right Diagonal Check
+                && TTTBoard[1][1] == currentPlayer
+                && TTTBoard[2][0] == currentPlayer;
 
     }
 
@@ -196,10 +196,10 @@ public class GameModel {
 
     public LiveData<String> winner() {
         if (winner != null) {
-            winnerMutableLiveData.setValue((winner == Player.X) ? player1 : player2);
+            winnerMutableLiveData.setValue((winner == Player.X) ? PLAYER_1 : PLAYER_2);
             return winnerMutableLiveData;
         } else {
-            winnerMutableLiveData.setValue(tie);
+            winnerMutableLiveData.setValue(TIED);
             return winnerMutableLiveData;
         }
     }
@@ -228,7 +228,7 @@ public class GameModel {
 
             Log.d(TAG, "undoMove: undoing " + row + " " + col);
 
-            TTTCell[row][col] = ' ';
+            TTTBoard[row][col] = ' ';
             switchPlayer();
 
             undoneMutableLiveData.setValue(undone);
