@@ -23,10 +23,10 @@ public class GameModel {
             player2 = "Player 2",
             tie = "Tied!";
 
-    private static MutableLiveData<Player> currentPlayerMutableLiveData = new MutableLiveData<>();
+    private MutableLiveData<Player> currentPlayerMutableLiveData = new MutableLiveData<>();
 
     //To pass the instructions from switchPlayer() to the viewModel
-    private static MutableLiveData<String> playerInstructionMutableLiveData = new MutableLiveData<>();
+    private MutableLiveData<String> playerInstructionMutableLiveData = new MutableLiveData<>();
 
     // To pass the winner and scores to the viewModel
     private MutableLiveData<Integer> player1ScoreMutableLiveData = new MutableLiveData<>();
