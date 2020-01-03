@@ -13,10 +13,13 @@ public class GameModel {
     private final String TAG = this.getClass().getName();
 
     private char[][] TTTBoard = new char[3][3];
-    static public int row, col;
+    private static int row, col;
 
     private Player currentPlayer, winner;
     private int player1Score = 0, player2Score = 0;
+
+    private enum GameStates {IS_OVER, IS_RUNNING}
+
     private GameStates gameState;
 
     private static final String PLAYER_1 = "Player 1",
@@ -26,15 +29,22 @@ public class GameModel {
     //To pass the instructions from switchPlayer() to the viewModel
     private MutableLiveData<String> playerInstructionMutableLiveData = new MutableLiveData<>();
 
+
     private Stack<int[]> undoStack;
 
     //Constructor
     public GameModel() {
-        currentPlayer = Player.X;
         winner = null;
         undoStack = new Stack<>();
 
+        restart();
+
+    }
+
+    public void restart() {
+        currentPlayer = Player.X;
         playerInstructionMutableLiveData.setValue("Player 1's turn");
+
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 TTTBoard[i][j] = ' ';
@@ -61,9 +71,9 @@ public class GameModel {
         Log.d(TAG, "mark: " + currentPlayer.toString());
 
         TTTBoard[row][col] = currentPlayer.toString().charAt(0);
-//        undoStack.push(String.format("%d%d", row, col));
 
         undoStack.push(new int[]{row, col});
+
         currentPlayerMutableLiveData.setValue(currentPlayer);
         return currentPlayerMutableLiveData;
     }
@@ -74,10 +84,12 @@ public class GameModel {
     public void switchPlayer() {
         currentPlayer = (currentPlayer == Player.X) ? Player.O : Player.X;
 
-        Log.d(TAG, "switchPlayer: switched" + currentPlayer.toString());
+        Log.d(TAG, "switchPlayer: switched " + currentPlayer.toString());
         if (currentPlayer == Player.X) {
+            Log.d(TAG, "switchPlayer: to x");
             playerInstructionMutableLiveData.setValue("Player 1's turn");
         } else {
+            Log.d(TAG, "switchPlayer: to o");
             playerInstructionMutableLiveData.setValue("Player 2's turn");
         }
     }
@@ -105,7 +117,6 @@ public class GameModel {
      * @return true if the Game is over
      */
     public boolean isGameEnd() {
-
         if (isGameWon(currentPlayer, row, col)) {
             winner = currentPlayer;
             Log.d(TAG, "winner: " + winner.toString());
@@ -114,6 +125,22 @@ public class GameModel {
         }
         return isGameTie();
     }
+
+//    /**
+//     * Overloading
+//     * @param currentPlayer from the AI class
+//     * row & col from the AI class
+//     * @return true if Game is Over
+//     */
+//    public boolean isGameEnd(Player currentPlayer, int row, int col) {
+//        if (isGameWon(currentPlayer, row, col)) {
+//            winner = currentPlayer;
+//            Log.d(TAG, "winner: " + winner.toString());
+//            gameState = GameStates.IS_OVER;
+//            return true;
+//        }
+//        return isGameTie();
+//    }
 
     /**
      * Check if board is full
@@ -212,13 +239,15 @@ public class GameModel {
      * Check if undo stack is empty to prevent EmptyStackException
      * <p>
      * Switch the player once again when undoing to prevent the current player from changing
+     * since switchPlayer() is called in the viewModel onCellClicked() too
      */
     public LiveData<int[]> undoMove() {
         MutableLiveData<int[]> undoneMutableLiveData = new MutableLiveData<>();
 
         int[] undone = new int[2];
 
-        if (!undoStack.isEmpty()) undone = undoStack.pop();
+        if (!undoStack.isEmpty())
+            undone = undoStack.pop();
 
         if (undone != null) {
             int row = undone[0];
@@ -226,8 +255,11 @@ public class GameModel {
 
             Log.d(TAG, "undoMove: undoing " + row + " " + col);
 
+            if (isCellNotEmpty(row, col)) {
+                switchPlayer();
+            }
+
             TTTBoard[row][col] = ' ';
-            switchPlayer();
 
             undoneMutableLiveData.setValue(undone);
             return undoneMutableLiveData;
@@ -235,4 +267,7 @@ public class GameModel {
         return undoneMutableLiveData;
     }
 
+    public char[][] getTTTBoard() {
+        return TTTBoard;
+    }
 }

@@ -1,7 +1,6 @@
 package com.sourabh.awesometic_tac_toe.viewmodel;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 
 import androidx.databinding.ObservableArrayMap;
 import androidx.lifecycle.LiveData;
@@ -18,13 +17,11 @@ public class GameViewModel extends ViewModel {
 
     private GameModel gameModel;
     public ObservableArrayMap<String, String> markCellText = new ObservableArrayMap<>();
-    private MutableLiveData<Integer> player1Score = new MutableLiveData<>();
-    private MutableLiveData<Integer> player2Score = new MutableLiveData<>();
 
     private boolean undoCheck;
 
     public GameViewModel() {
-
+        gameModel = new GameModel();
         restart();
 
         getPlayer1Score();
@@ -32,7 +29,7 @@ public class GameViewModel extends ViewModel {
     }
 
     private void restart() {
-        this.gameModel = new GameModel();
+        gameModel.restart();
         undoCheck = false;
     }
 
@@ -96,7 +93,7 @@ public class GameViewModel extends ViewModel {
         }
     }
 
-    private LiveData<String> winner() {
+    public LiveData<String> winner() {
         if (gameModel.winner() != null || Objects.equals(gameModel.winner().getValue(), "Tied!")) {
             return gameModel.winner();
         }
@@ -104,18 +101,14 @@ public class GameViewModel extends ViewModel {
     }
 
     public LiveData<Integer> getPlayer1Score() {
-        player1Score.setValue(gameModel.player1Score().getValue());
-        return player1Score;
+        return gameModel.player1Score();
     }
 
     public LiveData<Integer> getPlayer2Score() {
-        player2Score.setValue(gameModel.player2Score().getValue());
-        return player2Score;
+        return gameModel.player2Score();
     }
 
     public LiveData<String> getPlayerInstruction() {
         return gameModel.playerInstruction();
     }
-
-
 }
